@@ -176,8 +176,8 @@
 
   ## Implementation Phases
 
-  | Phase | Focus | Status |
-  |-------|-------|--------|
+  | Phase | Focus |
+  |-------|-------|
   | 1 | Foundation - repos, static IPs, cluster, OPNsense, AdGuard
   | 2 | Storage - TrueNAS SCALE, ZFS import, NFS shares
   | 3 | Core Services - Jellyfin (GPU), Caddy, Homepage
