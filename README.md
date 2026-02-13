@@ -74,13 +74,44 @@
       ▼
   ┌─────────────────────────┐
   │  VPN Kill Switch        │  ← All torrent traffic through ProtonVPN
-  │  (Gluetun + Docker)     │  ← If VPN drops, network dies - zero IP leaks
+  │  (Gluetun + Docker)     │  ← If VPN drops, network dies — zero IP leaks
   └─────────────────────────┘
       │
       ▼
   ┌─────────────────────────┐
   │  Tailscale              │  ← Remote access via encrypted WireGuard tunnels
   │  (zero open ports)      │  ← No port forwarding needed on firewall
+  └─────────────────────────┘  Internet
+      │
+      ▼
+  ┌─────────────────────────┐
+  │  OPNsense Firewall      │  ← All inbound traffic blocked by default
+  │  + CrowdSec IDS/IPS     │  ← Community blocklists + behavioral detection
+  │  + TOTP 2FA             │  ← Two-factor auth on admin access
+  └─────────────────────────┘
+      │
+      ▼
+  ┌─────────────────────────┐
+  │  AdGuard Home DNS       │  ← Blocks malware/phishing domains network-wide
+  └─────────────────────────┘
+      │
+      ▼
+  ┌─────────────────────────┐
+  │  Wazuh SIEM             │  ← Log correlation, file integrity monitoring,
+  │  (agents on all nodes)  │     vulnerability detection, MITRE ATT&CK mapping
+  └─────────────────────────┘
+      │
+      ▼
+  ┌─────────────────────────┐
+  │  VPN Kill Switch        │  ← All torrent traffic through ProtonVPN
+  │  (Gluetun + Docker)     │  ← If VPN drops, network dies — zero IP leaks
+  └─────────────────────────┘
+      │
+      ▼
+  ┌─────────────────────────┐
+  │  Tailscale              │  ← Remote access via encrypted WireGuard tunnels
+  │  (zero open ports)      │  ← No port forwarding needed on firewall
+  └─────────────────────────┘
   └─────────────────────────┘
 
   ### What's Exposed vs. Protected
