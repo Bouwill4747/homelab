@@ -1,0 +1,101 @@
+# Docker Compose — *arr Media Automation Stack
+# Location: VM 108 (arr-stack), /opt/arr/docker-compose.yml
+# All containers route through Gluetun VPN (kill switch architecture)
+#
+# CREDENTIALS REMOVED — replace with your own before deploying
+
+services:
+  # VPN Gateway — all other containers route through this
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - "8080:8080"   # qBittorrent Web UI
+      - "9696:9696"   # Prowlarr
+      - "7878:7878"   # Radarr
+      - "8989:8989"   # Sonarr
+    environment:
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_TYPE=openvpn
+      - OPENVPN_USER=<your-protonvpn-openvpn-username>
+      - OPENVPN_PASSWORD=<your-protonvpn-openvpn-password>
+      - SERVER_COUNTRIES=Netherlands
+      - DOT=off
+      - DNS_ADDRESS=10.2.0.1          # ProtonVPN internal DNS
+      - VPN_PORT_FORWARDING=on
+      - VPN_PORT_FORWARDING_PROVIDER=protonvpn
+      - HEALTH_VPN_DURATION_INITIAL=30s
+      - HEALTH_SUCCESS_WAIT_DURATION=20s
+    volumes:
+      - /opt/arr/config/gluetun:/gluetun
+    restart: unless-stopped
+
+  # Torrent Client — network goes through Gluetun (VPN kill switch)
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - WEBUI_PORT=8080
+    volumes:
+      - /opt/arr/config/qbittorrent:/config
+      - /mnt/media/Downloads:/downloads
+    depends_on:
+      - gluetun
+    restart: unless-stopped
+
+  # Indexer Manager — manages torrent indexer sources
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - /opt/arr/config/prowlarr:/config
+    depends_on:
+      - gluetun
+    restart: unless-stopped
+
+  # Movie Manager — searches, downloads, and organizes movies
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - /opt/arr/config/radarr:/config
+      - /mnt/media:/media
+      - /mnt/media/Downloads:/downloads
+    depends_on:
+      - gluetun
+    restart: unless-stopped
+
+  # TV Show Manager — searches, downloads, and organizes TV series
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - /opt/arr/config/sonarr:/config
+      - /mnt/media:/media
+      - /mnt/media/Downloads:/downloads
+    depends_on:
+      - gluetun
+    restart: unless-stopped

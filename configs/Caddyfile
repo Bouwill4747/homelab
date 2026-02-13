@@ -1,0 +1,85 @@
+# Caddyfile — Reverse Proxy Configuration
+# Location: CT 102 (caddy), /etc/caddy/Caddyfile
+# All routes are HTTP-only (local network, no public-facing services)
+# DNS resolution handled by AdGuard Home (*.lan → 10.0.0.4)
+
+# Jellyfin Media Server
+http://jellyfin.lan {
+	reverse_proxy 10.0.0.6:8096
+}
+
+# AdGuard Home DNS
+http://adguard.lan {
+	reverse_proxy 10.0.0.3:3000
+}
+
+# TrueNAS SCALE Storage
+http://truenas.lan {
+	reverse_proxy https://10.0.0.5 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+}
+
+# OPNsense Firewall (self-signed cert on backend)
+http://opnsense.lan {
+	reverse_proxy https://10.0.0.2 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+}
+
+# Uptime Kuma Monitoring
+http://uptime.lan {
+	reverse_proxy 10.0.0.9:3001
+}
+
+# Beszel Server Metrics
+http://beszel.lan {
+	reverse_proxy 10.0.0.10:8090
+}
+
+# qBittorrent (routed through Gluetun VPN)
+http://qbit.lan {
+	reverse_proxy 10.0.0.11:8080
+}
+
+# Prowlarr Indexer Manager
+http://prowlarr.lan {
+	reverse_proxy 10.0.0.11:9696
+}
+
+# Radarr Movie Manager
+http://radarr.lan {
+	reverse_proxy 10.0.0.11:7878
+}
+
+# Sonarr TV Show Manager
+http://sonarr.lan {
+	reverse_proxy 10.0.0.11:8989
+}
+
+# Proxmox Backup Server (self-signed cert on backend)
+http://pbs.lan {
+	reverse_proxy https://10.0.0.12:8007 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+}
+
+# Portainer Docker Management (self-signed cert on backend)
+http://portainer.lan {
+	reverse_proxy https://10.0.0.15:9443 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+}
+
+# Homepage Dashboard
+http://homepage.lan {
+	reverse_proxy 10.0.0.7:3000
+}
